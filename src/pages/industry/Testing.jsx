@@ -1,5 +1,5 @@
 /**
- * @file src/pages/industry/TestingLabs.jsx
+ * @file src/pages/industry/Testing.jsx
  * Industry Testing & Laboratories - Phase 10
  * 
  * Complete testing and laboratory discovery workspace with:
@@ -20,7 +20,7 @@ import LabDetails from '../../components/testing/LabDetails'
 import TestingSkeleton from '../../components/testing/TestingSkeleton'
 import { useTesting } from '../../hooks/useTesting'
 
-export default function TestingLabs() {
+export default function Testing() {
   const {
     products,
     standards,

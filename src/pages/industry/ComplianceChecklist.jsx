@@ -1,5 +1,180 @@
+/**
+ * @file src/pages/industry/ComplianceChecklist.jsx
+ * Industry Compliance Workspace - Phase 9
+ * 
+ * Displays comprehensive compliance tracking with:
+ * - Project overview and progress
+ * - Filterable checklist of requirements
+ * - Detailed requirement view
+ * - Compliance summary
+ */
+
 import { useState } from 'react'
 import IndustryLayout from '../../layouts/IndustryLayout'
-import { ChecklistItem, DownloadButton, ProgressBar } from '../../components/industry/IndustryUI'
-const defaultItems = [{ label: 'Applicable Standard', description: 'Relevant standard identified for the product.', checked: true }, { label: 'Product Specifications', description: 'Technical specification is prepared and reviewed.', checked: true }, { label: 'Manufacturing Details', description: 'Factory and manufacturing process details are available.', checked: true }, { label: 'Test Reports', description: 'Required test reports need to be added.', checked: false }, { label: 'Required Documents', description: 'Compile supporting documentation for application.', checked: false }, { label: 'Application', description: 'Prepare the product certification application.', checked: false }]
-export default function ComplianceChecklist() { const [items, setItems] = useState(defaultItems); const done = items.filter((item) => item.checked).length; const progress = Math.round((done / items.length) * 100); return <IndustryLayout title="Compliance Checklist"><section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_310px]"><article className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-sm font-semibold text-saffron">Certification readiness</p><h2 className="mt-2 text-2xl font-bold text-ink">Electric Ceiling Fan</h2><p className="mt-2 text-sm text-slate-600">Track the items needed for your mock certification journey.</p></div><DownloadButton /></div><div className="mt-8"><div className="flex items-end justify-between"><div><p className="text-sm font-bold text-ink">Overall progress</p><p className="mt-1 text-sm text-slate-500">{done} of {items.length} checklist items complete</p></div><span className="text-3xl font-bold text-navy">{progress}%</span></div><ProgressBar value={progress} className="mt-3" /></div><div className="mt-8 space-y-3">{items.map((item, index) => <ChecklistItem key={item.label} {...item} onChange={() => setItems(items.map((entry, i) => i === index ? { ...entry, checked: !entry.checked } : entry))} />)}</div></article><aside className="h-fit rounded-2xl border border-slate-200 bg-white p-5"><h2 className="font-bold text-ink">What happens next?</h2><p className="mt-3 text-sm leading-6 text-slate-600">Complete the outstanding items, then continue to the certification guide for a structured view of your path.</p><a href="/industry/certification" className="mt-5 inline-block text-sm font-bold text-navy">Open certification guide →</a><div className="mt-7 rounded-xl bg-orange-50 p-4 text-xs leading-5 text-orange-900"><b>Demo workspace:</b> This checklist is saved only in the current browser session.</div></aside></section></IndustryLayout> }
+import ComplianceHeader from '../../components/compliance/ComplianceHeader'
+import ComplianceProgress from '../../components/compliance/ComplianceProgress'
+import ComplianceFilters from '../../components/compliance/ComplianceFilters'
+import ComplianceChecklist from '../../components/compliance/ComplianceChecklist'
+import RequirementDetails from '../../components/compliance/RequirementDetails'
+import ComplianceSummary from '../../components/compliance/ComplianceSummary'
+import { useCompliance } from '../../hooks/useCompliance'
+
+export default function Compliance() {
+  const {
+    project,
+    items,
+    summary,
+    filters,
+    activeFilter,
+    selectedItem,
+    isLoading,
+    error,
+    filteredItems,
+    stats,
+    setActiveFilter,
+    updateItemStatus,
+    setSelectedItem,
+  } = useCompliance()
+
+  const [isDetailsPanelOpen, setIsDetailsPanelOpen] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
+
+  const handleItemSelect = (item) => {
+    setSelectedItem(item)
+    setIsDetailsPanelOpen(true)
+  }
+
+  const handleStatusChange = async (itemId, updates) => {
+    setIsUpdating(true)
+    try {
+      await updateItemStatus(itemId, updates)
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  const handleDownloadChecklist = () => {
+    // Generate checklist content
+    const checklistContent = filteredItems
+      .map(
+        (item) =>
+          `[${item.status === 'Completed' ? 'x' : ' '}] ${item.title}\n    ${item.description}\n`
+      )
+      .join('\n')
+
+    const fullContent = `
+COMPLIANCE CHECKLIST
+Product: ${project?.product_name}
+Standard: ${project?.standard_number}
+Status: ${project?.status}
+Overall Progress: ${project?.overall_progress}%
+
+${checklistContent}
+
+Generated on: ${new Date().toLocaleDateString()}
+`
+
+    const element = document.createElement('a')
+    element.setAttribute(
+      'href',
+      'data:text/plain;charset=utf-8,' + encodeURIComponent(fullContent)
+    )
+    element.setAttribute('download', `compliance-checklist-${Date.now()}.txt`)
+    element.style.display = 'none'
+    document.body.appendChild(element)
+    element.click()
+    document.body.removeChild(element)
+  }
+
+  if (error) {
+    return (
+      <IndustryLayout title="Compliance Workspace">
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+          <p className="text-red-900">Error loading compliance data: {error}</p>
+        </div>
+      </IndustryLayout>
+    )
+  }
+
+  return (
+    <IndustryLayout title="Compliance Workspace">
+      <div className="space-y-8">
+        {/* Header */}
+        {project && (
+          <>
+            <ComplianceHeader project={project} />
+
+            {/* Main content grid */}
+            <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
+              {/* Left column - Checklist and filters */}
+              <div className="space-y-6">
+                {/* Progress overview */}
+                <ComplianceProgress project={project} />
+
+                {/* Filters */}
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
+                  <h3 className="mb-4 font-bold text-ink">Filter Requirements</h3>
+                  <ComplianceFilters
+                    filters={filters}
+                    activeFilter={activeFilter}
+                    onFilterChange={setActiveFilter}
+                  />
+                </div>
+
+                {/* Checklist */}
+                <div>
+                  <div className="mb-3 flex items-center justify-between">
+                    <h3 className="font-bold text-ink">
+                      Requirements ({filteredItems.length})
+                    </h3>
+                    <button
+                      onClick={handleDownloadChecklist}
+                      className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                    >
+                      ↓ Download
+                    </button>
+                  </div>
+                  <ComplianceChecklist
+                    items={filteredItems}
+                    onItemSelect={handleItemSelect}
+                    selectedItemId={selectedItem?.id}
+                    onStatusChange={handleStatusChange}
+                    isLoading={isLoading}
+                  />
+                </div>
+              </div>
+
+              {/* Right column - Summary and Details */}
+              <div className="space-y-6">
+                {/* Summary */}
+                <ComplianceSummary summary={summary} />
+
+                {/* Details panel */}
+                {isDetailsPanelOpen && selectedItem ? (
+                  <div>
+                    <RequirementDetails
+                      item={selectedItem}
+                      onClose={() => setIsDetailsPanelOpen(false)}
+                      onStatusChange={handleStatusChange}
+                      isUpdating={isUpdating}
+                    />
+                  </div>
+                ) : (
+                  <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100 p-6 text-center">
+                    <p className="text-slate-600">Select a requirement to view details</p>
+                  </div>
+                )}
+
+                {/* Demo info */}
+                <div className="rounded-xl border border-orange-200 bg-orange-50 p-4 text-xs leading-5 text-orange-900">
+                  <b>Demo Workspace:</b> This compliance tracker uses demo data. Changes are saved only in
+                  the current browser session. Backend integration coming soon.
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </IndustryLayout>
+  )
+}
