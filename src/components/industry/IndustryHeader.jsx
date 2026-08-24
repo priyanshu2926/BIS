@@ -1,0 +1,7 @@
+import { Bell, BotMessageSquare, ChevronRight, Search } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { MobileMenuButton } from './IndustrySidebar'
+
+export default function IndustryHeader({ title, onMenu }) {
+  return <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-7"><div className="flex items-center gap-3"><MobileMenuButton onClick={onMenu} /><div className="min-w-0"><div className="hidden items-center gap-1 text-xs text-slate-500 sm:flex">Industry Workspace <ChevronRight size={13} /> <span>{title}</span></div><h1 className="truncate text-lg font-bold text-ink sm:mt-0.5">{title}</h1></div><div className="ml-auto flex items-center gap-2 sm:gap-3"><Link to="/industry/assistant" className="hidden items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-500 transition hover:border-blue-200 hover:text-navy md:flex"><Search size={16} />Quick AI access</Link><Link to="/industry/assistant" className="rounded-lg p-2 text-navy hover:bg-blue-50 md:hidden" aria-label="Open AI Assistant"><BotMessageSquare size={20} /></Link><button type="button" className="relative rounded-lg p-2 text-slate-500 hover:bg-slate-50" aria-label="Notifications"><Bell size={20} /><span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-saffron" /></button><button type="button" className="grid h-9 w-9 place-items-center rounded-full bg-navy text-xs font-bold text-white" aria-label="Profile for Ananya Sharma">AS</button></div></div></header>
+}
