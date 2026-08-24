@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { scroll-behavior: smooth; }
+body { @apply m-0 bg-white font-sans text-ink antialiased; }
+* { box-sizing: border-box; }
+button, a { -webkit-tap-highlight-color: transparent; }
+:focus-visible { @apply outline-none ring-2 ring-saffron ring-offset-2; }
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-rise { animation: rise-in 600ms ease-out both; }
+.animate-rise-delay { animation: rise-in 600ms 140ms ease-out both; }
