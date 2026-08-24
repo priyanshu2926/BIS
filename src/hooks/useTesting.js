@@ -9,7 +9,7 @@
  * - Details view management
  */
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { testingApi } from '../services/api/testingApi'
 
 export function useTesting() {
@@ -43,6 +43,8 @@ export function useTesting() {
    * Load products and standards on mount
    */
   useEffect(() => {
+    let isMounted = true
+
     async function loadInitialData() {
       try {
         setIsLoading(true)
@@ -51,28 +53,46 @@ export function useTesting() {
           testingApi.getProducts(),
           testingApi.getStandards(),
         ])
-        setProducts(prods || [])
-        setStandards(stds || [])
 
-        // Pre-select first product
-        if (prods && prods.length > 0) {
-          handleSelectProduct(prods[0])
+        if (isMounted) {
+          setProducts(prods || [])
+          setStandards(stds || [])
+
+          // Pre-select first product
+          if (prods && prods.length > 0) {
+            setSelectedProduct(prods[0])
+            if (prods[0].standard_id && stds && stds.length > 0) {
+              const defaultStd = stds.find((s) => s.id === prods[0].standard_id)
+              if (defaultStd) {
+                setSelectedStandard(defaultStd)
+              }
+            }
+          }
         }
       } catch (err) {
-        setError(err.message || 'Failed to load initial data')
-        console.error('Testing API error:', err)
+        if (isMounted) {
+          setError(err.message || 'Failed to load initial data')
+        }
       } finally {
-        setIsLoading(false)
+        if (isMounted) {
+          setIsLoading(false)
+        }
       }
     }
 
     loadInitialData()
+
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   /**
    * Load test requirements when standard changes
    */
   useEffect(() => {
+    let isMounted = true
+
     async function loadTests() {
       if (!selectedStandard) {
         setTestRequirements([])
@@ -83,18 +103,27 @@ export function useTesting() {
         setIsLoading(true)
         setError(null)
         const tests = await testingApi.getTestRequirements(selectedStandard.id)
-        setTestRequirements(tests || [])
-        setTestFilter('All')
-        setSelectedTest(null)
+        if (isMounted) {
+          setTestRequirements(tests || [])
+          setTestFilter('All')
+          setSelectedTest(null)
+        }
       } catch (err) {
-        setError(err.message || 'Failed to load test requirements')
-        console.error('Test requirements error:', err)
+        if (isMounted) {
+          setError(err.message || 'Failed to load test requirements')
+        }
       } finally {
-        setIsLoading(false)
+        if (isMounted) {
+          setIsLoading(false)
+        }
       }
     }
 
     loadTests()
+
+    return () => {
+      isMounted = false
+    }
   }, [selectedStandard])
 
   /**
@@ -104,7 +133,7 @@ export function useTesting() {
     setSelectedProduct(product)
 
     // Find and select the associated standard
-    if (product.standard_id && standards.length > 0) {
+    if (product?.standard_id && standards.length > 0) {
       const standard = standards.find((s) => s.id === product.standard_id)
       if (standard) {
         setSelectedStandard(standard)
@@ -120,9 +149,9 @@ export function useTesting() {
   }, [])
 
   /**
-   * Get filtered test requirements
+   * Get filtered test requirements (memoized)
    */
-  const getFilteredTests = useCallback(() => {
+  const filteredTests = useMemo(() => {
     if (testFilter === 'All') return testRequirements
     return testRequirements.filter((t) => t.status === testFilter)
   }, [testRequirements, testFilter])
@@ -144,7 +173,6 @@ export function useTesting() {
       setLaboratories(results || [])
     } catch (err) {
       setError(err.message || 'Failed to search laboratories')
-      console.error('Laboratory search error:', err)
     } finally {
       setIsSearchingLabs(false)
     }
@@ -161,34 +189,37 @@ export function useTesting() {
       setLaboratories(results || [])
     } catch (err) {
       setError(err.message || 'Failed to find labs for test')
-      console.error('Labs by category error:', err)
     } finally {
       setIsSearchingLabs(false)
     }
   }, [])
 
   /**
-   * Get unique test categories from test requirements
+   * Get unique test categories from test requirements (memoized)
    */
-  const getTestCategories = useCallback(() => {
+  const testCategories = useMemo(() => {
     const categories = new Set()
-    testRequirements.forEach((t) => categories.add(t.category))
+    testRequirements.forEach((t) => {
+      if (t.category) categories.add(t.category)
+    })
     return Array.from(categories).sort()
   }, [testRequirements])
 
   /**
-   * Get unique locations from laboratories
+   * Get unique locations from laboratories (memoized)
    */
-  const getLocations = useCallback(() => {
+  const availableLocations = useMemo(() => {
     const locations = new Set()
-    laboratories.forEach((lab) => locations.add(lab.location))
+    laboratories.forEach((lab) => {
+      if (lab.location) locations.add(lab.location)
+    })
     return Array.from(locations).sort()
   }, [laboratories])
 
   /**
-   * Get statistics about test requirements
+   * Get statistics about test requirements (memoized)
    */
-  const getTestStats = useCallback(() => {
+  const testStats = useMemo(() => {
     return {
       total: testRequirements.length,
       required: testRequirements.filter((t) => t.status === 'Required').length,
@@ -211,10 +242,10 @@ export function useTesting() {
     testFilter,
     labSearchQuery,
     labFilters,
-    filteredTests: getFilteredTests(),
-    testStats: getTestStats(),
-    testCategories: getTestCategories(),
-    availableLocations: getLocations(),
+    filteredTests,
+    testStats,
+    testCategories,
+    availableLocations,
 
     // State
     isLoading,

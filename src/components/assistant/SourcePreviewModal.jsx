@@ -3,7 +3,7 @@
  * Full source detail inspection dialog for verified BIS citations.
  */
 
-import { BookOpen, Copy, Check, ExternalLink, FileText, Info, ShieldCheck, X } from 'lucide-react'
+import { Copy, Check, ExternalLink, FileText, Info, ShieldCheck, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export default function SourcePreviewModal({ source, onClose }) {

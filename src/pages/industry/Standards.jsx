@@ -13,17 +13,10 @@
 
 import {
   AlertCircle,
-  BookOpen,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Database,
-  FileCheck,
   FileSearch,
-  Filter,
-  Layers,
   RefreshCw,
-  Search,
   ShieldCheck,
   Sparkles,
 } from 'lucide-react'

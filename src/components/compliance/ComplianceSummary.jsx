@@ -3,10 +3,8 @@
  * Visual summary showing documents, testing, and requirements progress.
  */
 
-export default function ComplianceSummary({ summary }) {
-  if (!summary) return null
-
-  const SummaryCard = ({ label, completed, total, percentage }) => (
+function SummaryCard({ label, completed, total, percentage }) {
+  return (
     <div className="rounded-lg border border-slate-200 bg-white p-4">
       <p className="text-sm font-semibold text-slate-700">{label}</p>
       <div className="mt-3 space-y-2">
@@ -25,6 +23,10 @@ export default function ComplianceSummary({ summary }) {
       </div>
     </div>
   )
+}
+
+export default function ComplianceSummary({ summary }) {
+  if (!summary) return null
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">

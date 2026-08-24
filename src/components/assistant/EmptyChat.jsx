@@ -3,7 +3,7 @@
  * Clean and informative empty state view when no messages exist in the conversation.
  */
 
-import { Bot, CheckCircle, FileSearch, HelpCircle, Landmark, ShieldCheck } from 'lucide-react'
+import { Bot, CheckCircle, FileSearch, ShieldCheck } from 'lucide-react'
 import SuggestedQuestions from './SuggestedQuestions'
 
 export default function EmptyChat({ onSelectQuestion }) {

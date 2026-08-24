@@ -5,19 +5,12 @@
  */
 
 import {
-  AlertCircle,
   Bookmark,
   BotMessageSquare,
   Calendar,
-  ExternalLink,
   Eye,
-  FileCheck,
-  FileText,
   ShieldAlert,
-  ShieldCheck,
-  Sparkles,
 } from 'lucide-react'
-import { useState } from 'react'
 
 function getStatusBadge(status) {
   switch (status) {
@@ -55,7 +48,6 @@ export default function StandardCard({
   onToggleSave,
   isSaving = false,
 }) {
-  const [hovered, setHovered] = useState(false)
   const statusBadge = getStatusBadge(standard.status)
 
   const handleBookmark = (e) => {
@@ -71,8 +63,6 @@ export default function StandardCard({
   return (
     <article
       onClick={() => onViewDetails?.(standard)}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       className="group relative flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 transition duration-150 hover:-translate-y-0.5 hover:border-navy hover:shadow-soft cursor-pointer"
     >
       <div>

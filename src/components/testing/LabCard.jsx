@@ -18,9 +18,17 @@ export default function LabCard({ lab, onSelectLab, isSelected = false }) {
   }
 
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => onSelectLab(lab)}
-      className={`w-full rounded-lg border-2 p-5 text-left transition-all ${
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onSelectLab(lab)
+        }
+      }}
+      className={`w-full rounded-lg border-2 p-5 text-left transition-all cursor-pointer ${
         isSelected
           ? 'border-navy bg-blue-50'
           : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-md'
@@ -82,6 +90,7 @@ export default function LabCard({ lab, onSelectLab, isSelected = false }) {
         </div>
 
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation()
             onSelectLab(lab)
@@ -91,6 +100,6 @@ export default function LabCard({ lab, onSelectLab, isSelected = false }) {
           Details →
         </button>
       </div>
-    </button>
+    </div>
   )
 }

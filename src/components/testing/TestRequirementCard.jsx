@@ -28,9 +28,17 @@ export default function TestRequirementCard({
   }
 
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => onSelectTest(test)}
-      className={`w-full rounded-lg border-2 p-4 text-left transition-all ${
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onSelectTest(test)
+        }
+      }}
+      className={`w-full rounded-lg border-2 p-4 text-left transition-all cursor-pointer ${
         isSelected
           ? 'border-navy bg-blue-50'
           : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-md'
@@ -62,6 +70,7 @@ export default function TestRequirementCard({
         </div>
 
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation()
             onFindLabs(test)
@@ -71,6 +80,6 @@ export default function TestRequirementCard({
           Find Labs →
         </button>
       </div>
-    </button>
+    </div>
   )
 }

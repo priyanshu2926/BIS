@@ -3,7 +3,7 @@
  * Interactive suggested question cards for fast discovery and empty states.
  */
 
-import { ArrowRight, BookOpen, CheckCircle2, FileQuestion, FileText, FlaskConical, HelpCircle, ShieldCheck } from 'lucide-react'
+import { ArrowRight, BookOpen, FileQuestion, FileText, FlaskConical, HelpCircle, ShieldCheck } from 'lucide-react'
 
 const DEFAULT_SUGGESTIONS = [
   {

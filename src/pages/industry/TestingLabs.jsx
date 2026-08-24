@@ -9,7 +9,6 @@
  * - Detailed views
  */
 
-import { useState } from 'react'
 import IndustryLayout from '../../layouts/IndustryLayout'
 import TestingHeader from '../../components/testing/TestingHeader'
 import ProductStandardSelector from '../../components/testing/ProductStandardSelector'
@@ -24,7 +23,6 @@ export default function TestingLabs() {
   const {
     products,
     standards,
-    testRequirements,
     laboratories,
     selectedProduct,
     selectedStandard,
@@ -51,16 +49,12 @@ export default function TestingLabs() {
     getLabsForTestCategory,
   } = useTesting()
 
-  const [showDetailPanel, setShowDetailPanel] = useState(false)
-
   const handleFindLabsForTest = async (test) => {
     setSelectedTest(test)
-    setShowDetailPanel(true)
     await getLabsForTestCategory(test.category)
   }
 
   const handleCloseDetails = () => {
-    setShowDetailPanel(false)
     setSelectedLaboratory(null)
   }
 

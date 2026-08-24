@@ -6,9 +6,6 @@
 import {
   ArrowLeft,
   ArrowRight,
-  CheckCircle2,
-  FileCheck,
-  Info,
   ShieldCheck,
   Sparkles,
 } from 'lucide-react'

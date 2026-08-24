@@ -8,7 +8,7 @@
  * - Uploading, Processing, Ready, and Failed states
  */
 
-import { AlertCircle, CheckCircle2, ChevronRight, Clock, Loader2, Sparkles, UploadCloud } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Clock, Loader2, Sparkles, UploadCloud } from 'lucide-react'
 import { DOCUMENT_STATUS } from '../../types/documents'
 
 /**

@@ -1,14 +1,19 @@
 import { useState, useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import ConsumerLayout from '../../layouts/ConsumerLayout'
 import { HeroSearchInput, ProductCard } from '../../components/consumer/ConsumerUI'
 import { consumerProducts } from '../../data/consumerMockData'
 
 export default function ConsumerProductsSearch() {
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const initialSearch = searchParams.get('search') || ''
   const [searchQuery, setSearchQuery] = useState(initialSearch)
   const [selectedCategory, setSelectedCategory] = useState('All')
+
+  const categories = useMemo(() => {
+    return ['All', ...new Set(consumerProducts.map((p) => p.category))]
+  }, [])
 
   const filteredProducts = useMemo(() => {
     return consumerProducts.filter((product) => {
@@ -25,22 +30,22 @@ export default function ConsumerProductsSearch() {
     })
   }, [searchQuery, selectedCategory])
 
-  const categories = ['All', ...new Set(consumerProducts.map((p) => p.category))]
-
   const handleSearch = (query) => {
     setSearchQuery(query)
   }
 
   const handleViewMore = (product) => {
-    // In a real app, navigate to product detail page
-    console.log('View more:', product)
+    // Navigate to assistant with product information context
+    navigate('/consumer/assistant', {
+      state: { initialQuery: `Tell me about ${product.name} and standard ${product.standard}` },
+    })
   }
 
   const handleAskAI = (product) => {
     // Navigate to AI assistant with context
-    window.location.href = `/consumer/assistant?context=${encodeURIComponent(
-      `Tell me about ${product.name}`
-    )}`
+    navigate('/consumer/assistant', {
+      state: { initialQuery: `Tell me about ${product.name} and standard ${product.standard}` },
+    })
   }
 
   return (
@@ -106,12 +111,12 @@ export default function ConsumerProductsSearch() {
         <p className="mt-2 text-sm leading-6 text-slate-600">
           If you can't find what you're looking for, you can always ask our AI Assistant for guidance.
         </p>
-        <a
-          href="/consumer/assistant"
+        <Link
+          to="/consumer/assistant"
           className="mt-4 inline-flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-orange-700"
         >
           Ask AI Assistant
-        </a>
+        </Link>
       </section>
     </ConsumerLayout>
   )

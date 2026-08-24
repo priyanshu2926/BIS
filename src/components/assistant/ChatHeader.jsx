@@ -3,7 +3,7 @@
  * Header for the AI Assistant Chat Window with controls, status indicators, and drawer toggles.
  */
 
-import { BotMessageSquare, BookOpen, Layers, Menu, Plus, Sparkles, Trash2 } from 'lucide-react'
+import { BotMessageSquare, BookOpen, Menu, Plus, Sparkles, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
 export default function ChatHeader({

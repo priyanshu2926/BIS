@@ -3,7 +3,7 @@
  * Header and Statistics Dashboard for BIS Industry Documents Workspace.
  */
 
-import { AlertCircle, CheckCircle2, Clock, Files, Plus, UploadCloud } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Clock, Files, UploadCloud } from 'lucide-react'
 
 export default function DocumentHeader({ stats, onOpenUpload }) {
   return (

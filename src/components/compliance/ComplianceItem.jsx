@@ -66,17 +66,27 @@ export default function ComplianceItem({
   }
 
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => onSelectItem(item)}
-      className={`w-full text-left transition-all ${
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onSelectItem(item)
+        }
+      }}
+      className={`w-full text-left transition-all cursor-pointer ${
         isSelected ? 'ring-2 ring-navy' : ''
       } rounded-lg border border-slate-200 bg-white p-4 hover:border-slate-300 hover:shadow-md`}
     >
       <div className="flex items-start gap-3">
         {/* Checkbox-like status indicator */}
         <button
+          type="button"
           onClick={handleStatusToggle}
           disabled={isUpdating}
+          aria-label={`Mark ${item.title} as ${item.status === 'Completed' ? 'Pending' : 'Completed'}`}
           className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 font-bold transition-all ${
             item.status === 'Completed'
               ? 'border-emerald-500 bg-emerald-50 text-emerald-600'
@@ -118,6 +128,6 @@ export default function ComplianceItem({
           </div>
         </div>
       </div>
-    </button>
+    </div>
   )
 }

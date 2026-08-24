@@ -17,15 +17,10 @@ import { useState } from 'react'
 import {
   AlertCircle,
   AlertTriangle,
-  BotMessageSquare,
-  FileCheck,
-  FileText,
-  HardDrive,
   Loader2,
   RefreshCw,
   Sparkles,
   Trash2,
-  UploadCloud,
   X,
 } from 'lucide-react'
 import IndustryLayout from '../../layouts/IndustryLayout'

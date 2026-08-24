@@ -3,7 +3,7 @@
  * Reusable compliance requirement card with importance badges and clause tags.
  */
 
-import { AlertCircle, CheckCircle2, FileText, Info, ShieldAlert, ShieldCheck } from 'lucide-react'
+import { AlertCircle, FileText, ShieldAlert, ShieldCheck } from 'lucide-react'
 
 function getImportanceBadge(importance) {
   switch (importance) {

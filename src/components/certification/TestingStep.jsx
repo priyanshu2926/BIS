@@ -5,17 +5,13 @@
  */
 
 import {
-  AlertCircle,
   ArrowLeft,
   ArrowRight,
   Clock,
   Cpu,
-  FileCheck,
   FlaskConical,
   Gauge,
   Info,
-  ShieldAlert,
-  ShieldCheck,
   Sparkles,
 } from 'lucide-react'
 

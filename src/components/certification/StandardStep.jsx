@@ -7,11 +7,8 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
-  FileCheck,
   FileText,
-  Info,
   ShieldAlert,
-  ShieldCheck,
   Sparkles,
 } from 'lucide-react'
 

@@ -15,10 +15,7 @@ import { useState, useRef } from 'react'
 import {
   AlertCircle,
   CheckCircle2,
-  FileCheck,
-  FileText,
   Loader2,
-  Tag,
   UploadCloud,
   X,
 } from 'lucide-react'

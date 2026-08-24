@@ -1,4 +1,4 @@
-import { BotMessageSquare, Plus, Send, Trash2 } from 'lucide-react'
+import { BotMessageSquare, Send, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import ConsumerLayout from '../../layouts/ConsumerLayout'
 import { ConsumerSourceCard, ConsumerChatMessage } from '../../components/consumer/ConsumerUI'

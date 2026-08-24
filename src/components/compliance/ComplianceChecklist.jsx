@@ -30,7 +30,12 @@ export default function ComplianceChecklist({ items, onItemSelect, selectedItemI
     <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
       <div className="divide-y divide-slate-200">
         {items.map((item) => (
-          <div key={item.id} className="p-4 hover:bg-slate-50 transition-colors">
+          <div
+            key={item.id}
+            className={`p-4 transition-colors ${
+              selectedItemId === item.id ? 'bg-blue-50/70' : 'hover:bg-slate-50'
+            }`}
+          >
             <ComplianceItemRow
               item={item}
               isSelected={selectedItemId === item.id}
@@ -47,7 +52,7 @@ export default function ComplianceChecklist({ items, onItemSelect, selectedItemI
 /**
  * Individual row item for checklist
  */
-function ComplianceItemRow({ item, isSelected, onSelect, onStatusChange }) {
+function ComplianceItemRow({ item, onSelect, onStatusChange }) {
   const [isUpdating, setIsUpdating] = useState(false)
 
   const handleStatusToggle = async (e) => {
@@ -88,11 +93,24 @@ function ComplianceItemRow({ item, isSelected, onSelect, onStatusChange }) {
   }
 
   return (
-    <div onClick={onSelect} className="w-full text-left cursor-pointer">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onSelect()
+        }
+      }}
+      className="w-full text-left cursor-pointer"
+    >
       <div className="flex items-start gap-3">
         <button
+          type="button"
           onClick={handleStatusToggle}
           disabled={isUpdating}
+          aria-label={`Toggle status for ${item.title}`}
           className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 font-bold transition-all ${
             item.status === 'Completed'
               ? 'border-emerald-500 bg-emerald-50 text-emerald-600'

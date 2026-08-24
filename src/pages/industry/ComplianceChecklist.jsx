@@ -22,7 +22,6 @@ import { useCompliance } from '../../hooks/useCompliance'
 export default function Compliance() {
   const {
     project,
-    items,
     summary,
     filters,
     activeFilter,
@@ -30,7 +29,6 @@ export default function Compliance() {
     isLoading,
     error,
     filteredItems,
-    stats,
     setActiveFilter,
     updateItemStatus,
     setSelectedItem,

@@ -10,7 +10,7 @@
  * - Actions: View, Ask AI, Delete
  */
 
-import { BotMessageSquare, Calendar, Eye, FileText, HardDrive, Sparkles, Trash2 } from 'lucide-react'
+import { Calendar, Eye, HardDrive, Sparkles, Trash2 } from 'lucide-react'
 import DocumentStatus from './DocumentStatus'
 import {
   DOCUMENT_STATUS,
@@ -26,7 +26,6 @@ export default function DocumentCard({
   onDelete,
 }) {
   const typeBadge = getFileTypeBadge(document.name)
-  const isReady = document.status === DOCUMENT_STATUS.READY
 
   return (
     <article className="group relative flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs transition-all duration-200 hover:border-blue-200 hover:shadow-soft">

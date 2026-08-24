@@ -12,85 +12,48 @@
  * - Query params: product_id, standard_id, location, test_category, query
  */
 
+import { apiClient } from './apiClient'
 import { mockTestingApi } from '../mock/mockTestingApi'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
-
-/**
- * Real HTTP implementation (for future FastAPI backend)
- * Uncomment and use when backend is ready.
- */
-// const httpApi = {
-//   getProducts: async () => {
-//     const response = await fetch(`${API_BASE_URL}/testing/products`)
-//     if (!response.ok) throw new Error('Failed to fetch products')
-//     return response.json()
-//   },
-//
-//   getStandards: async () => {
-//     const response = await fetch(`${API_BASE_URL}/testing/standards`)
-//     if (!response.ok) throw new Error('Failed to fetch standards')
-//     return response.json()
-//   },
-//
-//   getTestRequirements: async (standardId) => {
-//     const response = await fetch(`${API_BASE_URL}/testing/requirements?standard_id=${standardId}`)
-//     if (!response.ok) throw new Error('Failed to fetch test requirements')
-//     return response.json()
-//   },
-//
-//   searchLaboratories: async (filters) => {
-//     const params = new URLSearchParams()
-//     Object.entries(filters).forEach(([key, value]) => {
-//       if (value) params.append(key, value)
-//     })
-//     const response = await fetch(`${API_BASE_URL}/testing/laboratories?${params}`)
-//     if (!response.ok) throw new Error('Failed to search laboratories')
-//     return response.json()
-//   },
-//
-//   getLaboratoryById: async (labId) => {
-//     const response = await fetch(`${API_BASE_URL}/testing/laboratories/${labId}`)
-//     if (!response.ok) throw new Error('Failed to fetch laboratory details')
-//     return response.json()
-//   },
-//
-//   getTestRequirementById: async (testId) => {
-//     const response = await fetch(`${API_BASE_URL}/testing/requirements/${testId}`)
-//     if (!response.ok) throw new Error('Failed to fetch test details')
-//     return response.json()
-//   },
-//
-//   getLabsByTestCategory: async (testCategory) => {
-//     const response = await fetch(`${API_BASE_URL}/testing/laboratories?test_category=${testCategory}`)
-//     if (!response.ok) throw new Error('Failed to fetch labs by category')
-//     return response.json()
-//   },
-// }
+const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== 'false'
 
 /**
  * Testing API exported public interface
- * Uses mock data for now; switch to httpApi when backend is ready.
  */
 export const testingApi = {
   /**
    * Get all products available for testing
    * @returns {Promise<Array>} Array of products
    */
-  getProducts: () => mockTestingApi.getProducts(),
+  async getProducts() {
+    if (USE_MOCK_API) {
+      return mockTestingApi.getProducts()
+    }
+    return apiClient.get('/testing/products')
+  },
 
   /**
    * Get all standards
    * @returns {Promise<Array>} Array of standards
    */
-  getStandards: () => mockTestingApi.getStandards(),
+  async getStandards() {
+    if (USE_MOCK_API) {
+      return mockTestingApi.getStandards()
+    }
+    return apiClient.get('/testing/standards')
+  },
 
   /**
    * Get test requirements for a standard
    * @param {string} standardId - Standard identifier
    * @returns {Promise<Array>} Array of test requirements
    */
-  getTestRequirements: (standardId) => mockTestingApi.getTestRequirements(standardId),
+  async getTestRequirements(standardId) {
+    if (USE_MOCK_API) {
+      return mockTestingApi.getTestRequirements(standardId)
+    }
+    return apiClient.get(`/testing/requirements?standard_id=${standardId}`)
+  },
 
   /**
    * Search laboratories with optional filters
@@ -102,26 +65,50 @@ export const testingApi = {
    * @param {string} [filters.status] - Status filter
    * @returns {Promise<Array>} Array of matching laboratories
    */
-  searchLaboratories: (filters = {}) => mockTestingApi.searchLaboratories(filters),
+  async searchLaboratories(filters = {}) {
+    if (USE_MOCK_API) {
+      return mockTestingApi.searchLaboratories(filters)
+    }
+    const params = new URLSearchParams()
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) params.append(key, value)
+    })
+    return apiClient.get(`/testing/laboratories?${params.toString()}`)
+  },
 
   /**
    * Get laboratory details by ID
    * @param {string} labId - Laboratory identifier
    * @returns {Promise<Object|null>} Laboratory details or null
    */
-  getLaboratoryById: (labId) => mockTestingApi.getLaboratoryById(labId),
+  async getLaboratoryById(labId) {
+    if (USE_MOCK_API) {
+      return mockTestingApi.getLaboratoryById(labId)
+    }
+    return apiClient.get(`/testing/laboratories/${labId}`)
+  },
 
   /**
    * Get test requirement details by ID
    * @param {string} testId - Test identifier
    * @returns {Promise<Object|null>} Test details or null
    */
-  getTestRequirementById: (testId) => mockTestingApi.getTestRequirementById(testId),
+  async getTestRequirementById(testId) {
+    if (USE_MOCK_API) {
+      return mockTestingApi.getTestRequirementById(testId)
+    }
+    return apiClient.get(`/testing/requirements/${testId}`)
+  },
 
   /**
    * Get laboratories capable of a specific test category
    * @param {string} testCategory - Test category
    * @returns {Promise<Array>} Array of capable laboratories
    */
-  getLabsByTestCategory: (testCategory) => mockTestingApi.getLabsByTestCategory(testCategory),
+  async getLabsByTestCategory(testCategory) {
+    if (USE_MOCK_API) {
+      return mockTestingApi.getLabsByTestCategory(testCategory)
+    }
+    return apiClient.get(`/testing/laboratories?test_category=${encodeURIComponent(testCategory)}`)
+  },
 }

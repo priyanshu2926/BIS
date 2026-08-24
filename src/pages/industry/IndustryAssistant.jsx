@@ -11,7 +11,7 @@
  * - Zero direct fetch/network calls (all decoupled through useAssistant hook & assistantApi service)
  */
 
-import { BookOpen, FileCheck, Info, MessageSquare, Plus, ShieldCheck, Sparkles, X } from 'lucide-react'
+import { BookOpen, FileCheck, ShieldCheck, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import ChatHeader from '../../components/assistant/ChatHeader'

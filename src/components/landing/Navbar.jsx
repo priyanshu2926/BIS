@@ -1,6 +1,5 @@
 import { ChevronDown, Menu, X } from 'lucide-react'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import Brand from '../common/Brand'
 
 const navLinks = [

@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import ConsumerLayout from '../../layouts/ConsumerLayout'
 import {
   TopicCard,
@@ -11,17 +10,14 @@ import {
   Search,
   ShieldCheck,
   Gem,
-  AlertCircle,
 } from 'lucide-react'
 import { popularTopics, recentlyViewed } from '../../data/consumerMockData'
 import { useNavigate } from 'react-router-dom'
 
 export default function ConsumerDashboard() {
   const navigate = useNavigate()
-  const [searchQuery, setSearchQuery] = useState('')
 
   const handleSearch = (query) => {
-    setSearchQuery(query)
     navigate(`/consumer/products?search=${encodeURIComponent(query)}`)
   }
 

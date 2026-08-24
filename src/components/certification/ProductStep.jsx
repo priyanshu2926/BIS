@@ -6,7 +6,6 @@
 import {
   ArrowRight,
   Battery,
-  BotMessageSquare,
   CheckCircle2,
   Droplet,
   Fan,

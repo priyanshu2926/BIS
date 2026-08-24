@@ -14,25 +14,14 @@
 import { useState } from 'react'
 import {
   AlertCircle,
-  BookOpen,
-  Calendar,
-  CheckCircle2,
   Copy,
-  ExternalLink,
   Eye,
-  FileCheck,
   FileCode,
   FileText,
-  HardDrive,
-  Info,
-  Layers,
   ListOrdered,
   Loader2,
-  RefreshCw,
   RotateCcw,
-  ShieldCheck,
   Sparkles,
-  Tag,
   Trash2,
   X,
 } from 'lucide-react'
@@ -58,7 +47,6 @@ export default function DocumentDetails({
   if (!isOpen || !document) return null
 
   const isReady = document.status === DOCUMENT_STATUS.READY
-  const isProcessing = document.status === DOCUMENT_STATUS.PROCESSING
   const isFailed = document.status === DOCUMENT_STATUS.FAILED
   const typeBadge = getFileTypeBadge(document.name)
 
