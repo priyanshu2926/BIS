@@ -3,7 +3,7 @@ import Landing from '../pages/Landing'
 import IndustryDashboard from '../pages/industry/IndustryDashboard'
 import IndustryAssistant from '../pages/industry/IndustryAssistant'
 import Standards from '../pages/industry/Standards'
-import CertificationAssistant from '../pages/industry/CertificationAssistant'
+import Certification from '../pages/industry/Certification'
 import ComplianceChecklist from '../pages/industry/ComplianceChecklist'
 import TestingLabs from '../pages/industry/TestingLabs'
 import Documents from '../pages/industry/Documents'
@@ -21,7 +21,7 @@ export default function AppRoutes() {
       <Route path="/industry" element={<IndustryDashboard />} />
       <Route path="/industry/assistant" element={<IndustryAssistant />} />
       <Route path="/industry/standards" element={<Standards />} />
-      <Route path="/industry/certification" element={<CertificationAssistant />} />
+      <Route path="/industry/certification" element={<Certification />} />
       <Route path="/industry/compliance" element={<ComplianceChecklist />} />
       <Route path="/industry/testing" element={<TestingLabs />} />
       <Route path="/industry/documents" element={<Documents />} />
