@@ -1,8 +1,8 @@
 import { Route, Routes } from 'react-router-dom'
 import Landing from '../pages/Landing'
 import IndustryDashboard from '../pages/industry/IndustryDashboard'
-import AIAssistant from '../pages/industry/AIAssistant'
-import StandardsSearch from '../pages/industry/StandardsSearch'
+import IndustryAssistant from '../pages/industry/IndustryAssistant'
+import Standards from '../pages/industry/Standards'
 import CertificationAssistant from '../pages/industry/CertificationAssistant'
 import ComplianceChecklist from '../pages/industry/ComplianceChecklist'
 import TestingLabs from '../pages/industry/TestingLabs'
@@ -19,8 +19,8 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/industry" element={<IndustryDashboard />} />
-      <Route path="/industry/assistant" element={<AIAssistant />} />
-      <Route path="/industry/standards" element={<StandardsSearch />} />
+      <Route path="/industry/assistant" element={<IndustryAssistant />} />
+      <Route path="/industry/standards" element={<Standards />} />
       <Route path="/industry/certification" element={<CertificationAssistant />} />
       <Route path="/industry/compliance" element={<ComplianceChecklist />} />
       <Route path="/industry/testing" element={<TestingLabs />} />
