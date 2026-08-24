@@ -9,7 +9,7 @@ import config from './config/env.js';
 
 const server = app.listen(config.PORT, () => {
   console.log('====================================================');
-  console.log('  BIS AI Assistant Backend API — Phase 0');
+  console.log('  BIS AI Assistant Backend API — Phase 1');
   console.log('====================================================');
   console.log(`  Environment  : ${config.NODE_ENV}`);
   console.log(`  Server Port  : ${config.PORT}`);

@@ -19,11 +19,13 @@ dotenv.config({ path: envPath });
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const PORT = parseInt(process.env.PORT || '5000', 10);
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/bis_assistant';
 
 export const config = Object.freeze({
   PORT: isNaN(PORT) ? 5000 : PORT,
   NODE_ENV,
   FRONTEND_URL,
+  DATABASE_URL,
   isProduction: NODE_ENV === 'production',
   isDevelopment: NODE_ENV === 'development',
   isTest: NODE_ENV === 'test',

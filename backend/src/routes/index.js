@@ -6,6 +6,15 @@
 
 import { Router } from 'express';
 import healthRoutes from './healthRoutes.js';
+import standardsRoutes from './standardsRoutes.js';
+import productsRoutes from './productsRoutes.js';
+import testingRoutes from './testingRoutes.js';
+import usersRoutes from './usersRoutes.js';
+import certificationRoutes from './certificationRoutes.js';
+import complianceRoutes from './complianceRoutes.js';
+import documentsRoutes from './documentsRoutes.js';
+import complaintsRoutes from './complaintsRoutes.js';
+import chatRoutes from './chatRoutes.js';
 
 const router = Router();
 
@@ -13,18 +22,14 @@ const router = Router();
  * Phase 0 — Core Foundation Routes
  */
 router.use('/health', healthRoutes);
-
-/**
- * Future API Module Placeholders (to be implemented in subsequent phases):
- * 
- * router.use('/standards', standardsRoutes);
- * router.use('/assistant', assistantRoutes);
- * router.use('/certification', certificationRoutes);
- * router.use('/compliance', complianceRoutes);
- * router.use('/testing', testingRoutes);
- * router.use('/documents', documentsRoutes);
- * router.use('/products', productsRoutes);
- * router.use('/complaints', complaintsRoutes);
- */
+router.use('/standards', standardsRoutes);
+router.use('/products', productsRoutes);
+router.use('/testing', testingRoutes);
+router.use('/users', usersRoutes);
+router.use('/certification', certificationRoutes);
+router.use('/compliance', complianceRoutes);
+router.use('/documents', documentsRoutes);
+router.use('/complaints', complaintsRoutes);
+router.use('/chat', chatRoutes);
 
 export default router;
