@@ -8,6 +8,11 @@ import ComplianceChecklist from '../pages/industry/ComplianceChecklist'
 import TestingLabs from '../pages/industry/TestingLabs'
 import Documents from '../pages/industry/Documents'
 import ConsumerDashboard from '../pages/consumer/ConsumerDashboard'
+import ConsumerAIAssistant from '../pages/consumer/ConsumerAIAssistant'
+import ConsumerProductsSearch from '../pages/consumer/ConsumerProductsSearch'
+import ConsumerProductSafety from '../pages/consumer/ConsumerProductSafety'
+import ConsumerHallmarking from '../pages/consumer/ConsumerHallmarking'
+import ConsumerComplaintGuidance from '../pages/consumer/ConsumerComplaintGuidance'
 
 export default function AppRoutes() {
   return (
@@ -21,6 +26,11 @@ export default function AppRoutes() {
       <Route path="/industry/testing" element={<TestingLabs />} />
       <Route path="/industry/documents" element={<Documents />} />
       <Route path="/consumer" element={<ConsumerDashboard />} />
+      <Route path="/consumer/assistant" element={<ConsumerAIAssistant />} />
+      <Route path="/consumer/products" element={<ConsumerProductsSearch />} />
+      <Route path="/consumer/safety" element={<ConsumerProductSafety />} />
+      <Route path="/consumer/hallmarking" element={<ConsumerHallmarking />} />
+      <Route path="/consumer/complaints" element={<ConsumerComplaintGuidance />} />
     </Routes>
   )
 }
