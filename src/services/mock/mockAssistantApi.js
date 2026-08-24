@@ -273,6 +273,33 @@ const delay = (ms = 700) => new Promise((resolve) => setTimeout(resolve, ms))
 function generateMockResponse(prompt, conversationId) {
   const query = prompt.toLowerCase().trim()
 
+  if (
+    (query.includes('analyze') || query.includes('analysis')) &&
+    (query.includes('document') || query.includes('report') || query.includes('.pdf') || query.includes('.docx') || query.includes('specification') || query.includes('layout'))
+  ) {
+    return {
+      content: `### AI Document Intelligence & Compliance Analysis
+
+Based on the automated RAG extraction and vector analysis for this document:
+
+#### 1. Document Overview & Scope
+* **Document Type:** Technical & Compliance Verification Dossier
+* **Governing Standard:** **IS 374:2019 (Demo)** / BIS Scheme-I Product Guidelines
+* **Analysis Status:** Verified against published Gazette notifications & BIS Scheme of Inspection and Testing (SIT).
+
+#### 2. Extracted Clauses & Key Technical Parameters
+* **Electrical Insulation (Clause 4.2):** Insulation resistance exceeds mandatory thresholds ($>100\\text{ M}\\Omega$ vs. required $2\\text{ M}\\Omega$).
+* **Dielectric Withstand Test:** Passed at $1.5\\text{ kV AC}$ for 60 seconds without flashover or puncture.
+* **Performance & Safety Acceptance:** Key ratings, air delivery parameters, and thermal dissipation conform to Class A limits.
+
+#### 3. Recommended Industry Actions
+1. **Quality Register Entry:** Record this document in your internal Factory Testing & Calibration Register.
+2. **Application Filing:** Attach this report as primary technical evidence during online Form-I submission on **Manakonline**.
+3. **Audit Readiness:** Keep hard copies available for the BIS inspecting officer during the upcoming factory audit.`,
+      sources: DEMO_SOURCES.CEILING_FAN,
+    }
+  }
+
   if (query.includes('fan') || query.includes('is 374') || query.includes('motor')) {
     return {
       content: `### Technical Guidance: Electric Fans (IS 374:2019 Demo)

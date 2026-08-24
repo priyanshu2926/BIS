@@ -54,8 +54,8 @@ export default function IndustryAssistant() {
     if (location.state?.prompt && !handledPromptRef.current && !isLoading) {
       handledPromptRef.current = true
       const incomingPrompt = location.state.prompt
-      // Start a fresh conversation with standard title if provided
-      const title = location.state.standardNumber || 'Standards Query'
+      // Start a fresh conversation with document or standard title if provided
+      const title = location.state.documentName || location.state.standardNumber || 'AI Assistant Query'
       createNewConversation(title).then(() => {
         sendMessage(incomingPrompt)
       })
