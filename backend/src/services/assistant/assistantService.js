@@ -21,14 +21,14 @@ const getOrCreateSession = async (sessionId, mode = 'industry', initialTitle = '
   if (await isDatabaseAvailable()) {
     try {
       if (sessionId) {
-        const existing = await prisma.chatSession.findUnique({
+        const existing = await prisma.assistantSession.findUnique({
           where: { id: sessionId },
           include: { messages: { orderBy: { createdAt: 'asc' } } },
         });
         if (existing) return existing;
       }
 
-      const created = await prisma.chatSession.create({
+      const created = await prisma.assistantSession.create({
         data: {
           title: initialTitle,
           mode: mode || 'industry',
@@ -72,14 +72,14 @@ const persistMessages = async (sessionId, userMessage, assistantAnswer, sources 
   if (await isDatabaseAvailable()) {
     try {
       await prisma.$transaction([
-        prisma.chatMessage.create({
+        prisma.assistantMessage.create({
           data: {
             sessionId,
             role: 'USER',
             content: userMessage,
           },
         }),
-        prisma.chatMessage.create({
+        prisma.assistantMessage.create({
           data: {
             sessionId,
             role: 'ASSISTANT',
@@ -87,7 +87,7 @@ const persistMessages = async (sessionId, userMessage, assistantAnswer, sources 
             metadata: { sources },
           },
         }),
-        prisma.chatSession.update({
+        prisma.assistantSession.update({
           where: { id: sessionId },
           data: {
             updatedAt: new Date(),
@@ -200,7 +200,7 @@ export const processChat = async ({ message, mode = 'industry', sessionId = null
 export const getSessionById = async (sessionId) => {
   if (await isDatabaseAvailable()) {
     try {
-      const session = await prisma.chatSession.findUnique({
+      const session = await prisma.assistantSession.findUnique({
         where: { id: sessionId },
         include: { messages: { orderBy: { createdAt: 'asc' } } },
       });
@@ -228,7 +228,7 @@ export const listSessions = async (mode) => {
   if (await isDatabaseAvailable()) {
     try {
       const where = mode ? { mode } : {};
-      const sessions = await prisma.chatSession.findMany({
+      const sessions = await prisma.assistantSession.findMany({
         where,
         include: { _count: { select: { messages: true } } },
         orderBy: { updatedAt: 'desc' },
@@ -256,6 +256,7 @@ export const listSessions = async (mode) => {
 
 export default {
   processChat,
+  createSession,
   getSessionById,
   listSessions,
 };

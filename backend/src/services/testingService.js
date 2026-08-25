@@ -25,15 +25,13 @@ export const testingService = {
       ];
     }
 
-    const [labs, total] = await Promise.all([
-      prisma.testingLab.findMany({
+    const labs = await prisma.testingLab.findMany({
         where,
         skip,
         take,
         orderBy: { name: 'asc' },
-      }),
-      prisma.testingLab.count({ where }),
-    ]);
+      });
+    const total = await prisma.testingLab.count({ where });
 
     return { labs, total };
   },

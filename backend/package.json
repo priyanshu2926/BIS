@@ -30,7 +30,6 @@
   "dependencies": {
     "@electric-sql/pglite": "^0.4.6",
     "@electric-sql/pglite-socket": "^0.1.6",
-    "@prisma/client": "^5.22.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
@@ -41,10 +40,6 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.9",
-<<<<<<< HEAD
     "prisma": "^6.4.1"
-=======
-    "prisma": "^5.22.0"
->>>>>>> ed99aa5029fb2b3f561ad1cc7dee8cdb621096d5
   }
 }

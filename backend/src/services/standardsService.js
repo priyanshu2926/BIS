@@ -31,18 +31,12 @@ export const standardsService = {
       ];
     }
 
-    const [standards, total] = await Promise.all([
-      prisma.standard.findMany({
-        where,
-        skip,
-        take,
-        orderBy: { standardNumber: 'asc' },
-        include: {
-          certifications: true,
-        },
-      }),
-      prisma.standard.count({ where }),
-    ]);
+    // PGlite multiplexes a single database connection in local development.
+    // Sequential queries avoid prepared-statement name collisions there.
+    const standards = await prisma.standard.findMany({
+      where, skip, take, orderBy: { standardNumber: 'asc' }, include: { certifications: true },
+    });
+    const total = await prisma.standard.count({ where });
 
     return { standards, total };
   },
@@ -66,18 +60,10 @@ export const standardsService = {
       ];
     }
 
-    const [standards, total] = await Promise.all([
-      prisma.standard.findMany({
-        where,
-        skip,
-        take,
-        orderBy: { standardNumber: 'asc' },
-        include: {
-          certifications: true,
-        },
-      }),
-      prisma.standard.count({ where }),
-    ]);
+    const standards = await prisma.standard.findMany({
+      where, skip, take, orderBy: { standardNumber: 'asc' }, include: { certifications: true },
+    });
+    const total = await prisma.standard.count({ where });
 
     return { standards, total };
   },

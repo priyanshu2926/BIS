@@ -26,8 +26,7 @@ export const productsService = {
       ];
     }
 
-    const [products, total] = await Promise.all([
-      prisma.product.findMany({
+    const products = await prisma.product.findMany({
         where,
         skip,
         take,
@@ -40,9 +39,8 @@ export const productsService = {
           },
           complianceChecks: true,
         },
-      }),
-      prisma.product.count({ where }),
-    ]);
+      });
+    const total = await prisma.product.count({ where });
 
     return { products, total };
   },
@@ -63,8 +61,7 @@ export const productsService = {
       ];
     }
 
-    const [products, total] = await Promise.all([
-      prisma.product.findMany({
+    const products = await prisma.product.findMany({
         where,
         skip,
         take,
@@ -76,9 +73,8 @@ export const productsService = {
             },
           },
         },
-      }),
-      prisma.product.count({ where }),
-    ]);
+      });
+    const total = await prisma.product.count({ where });
 
     return { products, total };
   },

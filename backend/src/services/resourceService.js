@@ -14,7 +14,8 @@ export const resourceService = {
     const delegate = prisma[config.delegate];
     const args = { skip, take, orderBy: config.orderBy };
     if (config.include) args.include = config.include;
-    const [data, total] = await Promise.all([delegate.findMany(args), delegate.count()]);
+    const data = await delegate.findMany(args);
+    const total = await delegate.count();
     return { data, total };
   },
 

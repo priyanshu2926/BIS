@@ -6,7 +6,10 @@ import net from 'net';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const dbPath = path.resolve(__dirname, '../prisma/pgdata');
+// PGlite uses its own data format. Keep it separate from the legacy PostgreSQL
+// data directory checked into this project so a stale postmaster file cannot
+// prevent the bundled development database from starting.
+const dbPath = path.resolve(__dirname, '../prisma/pglite-data');
 
 process.on('uncaughtException', (err) => {
   console.error('[Database Server uncaughtException]:', err.message);
@@ -43,9 +46,9 @@ export async function startPostgresServer(port = 5432) {
   }
 
   const db = new PGlite(dbPath);
-  const server = new PGLiteSocketServer({ db, port, host: '0.0.0.0', maxConnections: 100 });
+  const server = new PGLiteSocketServer({ db, port, host: '127.0.0.1', maxConnections: 100 });
   await server.start();
-  console.log(`[Database] Local PostgreSQL wire-protocol server listening on 0.0.0.0:${port} (maxConnections: 100, data: ${dbPath})`);
+  console.log(`[Database] Local PostgreSQL wire-protocol server listening on 127.0.0.1:${port} (maxConnections: 100, data: ${dbPath})`);
   return server;
 }
 
