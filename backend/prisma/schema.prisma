@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ExtractionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model Standard {
+  id        String             @id @default(uuid())
+  number    String             @unique
+  title     String
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  documents StandardDocument[]
+
+  @@index([title])
+}
+
+model StandardDocument {
+  id               String           @id @default(uuid())
+  standardId       String
+  fileName         String
+  fileType         String
+  filePath         String
+  sourceUrl        String?
+  documentVersion  String?
+  pageCount        Int?
+  extractionStatus ExtractionStatus @default(PENDING)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  standard         Standard         @relation(fields: [standardId], references: [id], onDelete: Cascade)
+  chunks           StandardChunk[]
+
+  @@index([standardId])
+  @@index([extractionStatus])
+}
+
+model StandardChunk {
+  id           String           @id @default(uuid())
+  documentId   String
+  chunkIndex   Int
+  content      String
+  pageNumber   Int
+  sectionTitle String?
+  metadata     Json
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  document     StandardDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, chunkIndex])
+  @@index([documentId, pageNumber])
+  @@index([sectionTitle])
+}
