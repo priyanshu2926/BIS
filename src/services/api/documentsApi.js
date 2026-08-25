@@ -91,10 +91,8 @@ export const documentsApi = {
       formData.append('related_project_id', payload.related_project_id)
     }
 
-    // In a live environment with axios/XHR or custom fetch wrapper with progress
-    return apiClient.post('/documents/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
+    // Send FormData directly; boundary is automatically handled by browser/fetch
+    return apiClient.post('/documents/upload', formData)
   },
 
   /**

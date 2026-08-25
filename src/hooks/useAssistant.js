@@ -10,7 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { assistantApi } from '../services/api/assistantApi'
 import { ROLES, createMessage } from '../types/assistant'
 
-export function useAssistant(initialConversationId = null) {
+export function useAssistant(initialConversationId = null, mode = 'industry') {
   const [conversations, setConversations] = useState([])
   const [currentConversationId, setCurrentConversationId] = useState(initialConversationId)
   const [messages, setMessages] = useState([])
@@ -150,22 +150,24 @@ export function useAssistant(initialConversationId = null) {
 
   /**
    * Send a user message and receive AI response with sources
+   * @param {string} text - User message content
+   * @param {string} [overrideConversationId=null] - Optional conversation ID to bypass state closure latency
    */
   const sendMessage = useCallback(
-    async (text) => {
+    async (text, overrideConversationId = null) => {
       const cleanText = text?.trim()
       if (!cleanText || isSending) return
 
       lastSentTextRef.current = cleanText
       setError(null)
 
-      let targetConvId = currentConversationId
+      let targetConvId = overrideConversationId || currentConversationId
 
       // If no active conversation, create one first
       if (!targetConvId) {
         try {
           const generatedTitle = cleanText.length > 30 ? `${cleanText.substring(0, 30)}...` : cleanText
-          const newConvRes = await assistantApi.createConversation(generatedTitle)
+          const newConvRes = await assistantApi.createConversation(generatedTitle, mode)
           targetConvId = newConvRes.conversation.id
           setConversations((prev) => [newConvRes.conversation, ...prev])
           setCurrentConversationId(targetConvId)
@@ -182,13 +184,23 @@ export function useAssistant(initialConversationId = null) {
         content: cleanText,
       })
 
-      setMessages((prev) => [...prev, optimisticUserMsg])
+      setMessages((prev) => {
+        // Prevent duplicate user bubble when retrying the same message
+        if (prev.length > 0) {
+          const lastMsg = prev[prev.length - 1]
+          if (lastMsg.role === ROLES.USER && lastMsg.content === cleanText) {
+            return prev
+          }
+        }
+        return [...prev, optimisticUserMsg]
+      })
       setIsSending(true)
 
       try {
         const response = await assistantApi.sendMessage({
           conversationId: targetConvId,
           message: cleanText,
+          mode,
         })
 
         const assistantMsg = response.message
@@ -220,7 +232,7 @@ export function useAssistant(initialConversationId = null) {
         setIsSending(false)
       }
     },
-    [currentConversationId, isSending]
+    [currentConversationId, isSending, mode]
   )
 
   /**

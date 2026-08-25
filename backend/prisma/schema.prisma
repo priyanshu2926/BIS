@@ -60,3 +60,34 @@ model StandardChunk {
   @@index([documentId, pageNumber])
   @@index([sectionTitle])
 }
+
+enum ChatRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+model ChatSession {
+  id        String        @id @default(uuid())
+  title     String        @default("New Conversation")
+  mode      String        @default("industry")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  messages  ChatMessage[]
+
+  @@index([mode])
+  @@index([createdAt])
+}
+
+model ChatMessage {
+  id        String      @id @default(uuid())
+  sessionId String
+  role      ChatRole
+  content   String
+  metadata  Json?
+  createdAt DateTime    @default(now())
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+}
+

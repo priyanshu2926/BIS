@@ -1,117 +1,60 @@
-/**
- * @file src/services/api/assistantApi.js
- * Primary API Service for BIS AI Assistant.
- * 
- * Clean abstraction layer decoupling React components & custom hooks from API/network logic.
- * Currently uses high-fidelity mockAssistantApi.
- * Can be swapped to a real FastAPI + RAG backend without modifying any UI components.
- * 
- * Proposed Future FastAPI Endpoints:
- * - POST   /api/assistant/chat
- * - GET    /api/assistant/conversations
- * - GET    /api/assistant/conversations/{conversation_id}
- * - POST   /api/assistant/conversations
- * - DELETE /api/assistant/conversations/{conversation_id}
- * - POST   /api/assistant/messages/{message_id}/regenerate
- * - POST   /api/assistant/conversations/{conversation_id}/clear
- */
-
+/** API adapter for the Phase 3 Express BIS assistant endpoints. */
 import { apiClient } from './apiClient'
 import { mockAssistantApi } from '../mock/mockAssistantApi'
 
-// Set to false when connecting to live FastAPI backend
-const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== 'false'
+const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true'
+
+const toConversation = (session) => ({
+  id: session.id,
+  title: session.title,
+  created_at: session.createdAt,
+  updated_at: session.updatedAt,
+  message_count: session._count?.messages ?? session.messages?.length ?? 0,
+})
+
+const toMessage = (message) => ({
+  id: message.id,
+  conversation_id: message.sessionId,
+  role: String(message.role).toLowerCase() === 'assistant' ? 'assistant' : 'user',
+  content: message.content,
+  created_at: message.createdAt,
+  sources: message.metadata?.sources || [],
+})
 
 export const assistantApi = {
-  /**
-   * Fetch all conversation history summaries
-   * @returns {Promise<{ conversations: Array }>}
-   */
   async getConversations() {
-    if (USE_MOCK_API) {
-      return mockAssistantApi.getConversations()
-    }
-    return apiClient.get('/assistant/conversations')
+    if (USE_MOCK_API) return mockAssistantApi.getConversations()
+    const response = await apiClient.get('/assistant/sessions')
+    return { conversations: (response.data || []).map(toConversation) }
   },
 
-  /**
-   * Fetch specific conversation with full message history and citations
-   * @param {string} conversationId
-   * @returns {Promise<{ conversation: Object, messages: Array }>}
-   */
   async getConversation(conversationId) {
-    if (USE_MOCK_API) {
-      return mockAssistantApi.getConversation(conversationId)
-    }
-    return apiClient.get(`/assistant/conversations/${conversationId}`)
+    if (USE_MOCK_API) return mockAssistantApi.getConversation(conversationId)
+    const response = await apiClient.get(`/assistant/sessions/${conversationId}`)
+    const session = response.data
+    return { conversation: toConversation(session), messages: (session.messages || []).map(toMessage) }
   },
 
-  /**
-   * Create a new empty conversation session
-   * @param {string} [title='New Conversation']
-   * @returns {Promise<{ conversation: Object }>}
-   */
-  async createConversation(title = 'New Conversation') {
-    if (USE_MOCK_API) {
-      return mockAssistantApi.createConversation(title)
-    }
-    return apiClient.post('/assistant/conversations', { title })
+  async createConversation(title = 'New Conversation', mode = 'industry') {
+    if (USE_MOCK_API) return mockAssistantApi.createConversation(title)
+    const response = await apiClient.post('/assistant/sessions', { title, mode })
+    return { conversation: toConversation(response.data) }
   },
 
-  /**
-   * Delete a conversation by ID
-   * @param {string} conversationId
-   * @returns {Promise<{ success: boolean, id: string }>}
-   */
-  async deleteConversation(conversationId) {
-    if (USE_MOCK_API) {
-      return mockAssistantApi.deleteConversation(conversationId)
+  async sendMessage({ conversationId, message, mode = 'industry' }) {
+    if (USE_MOCK_API) return mockAssistantApi.sendMessage({ conversationId, message })
+    const response = await apiClient.post('/assistant/chat', { sessionId: conversationId, message, mode })
+    const data = response.data
+    return {
+      conversation: { id: data.sessionId, mode: data.mode },
+      message: {
+        id: `assistant_${Date.now()}`,
+        conversation_id: data.sessionId,
+        role: 'assistant',
+        content: data.answer,
+        created_at: new Date().toISOString(),
+        sources: data.sources || [],
+      },
     }
-    return apiClient.delete(`/assistant/conversations/${conversationId}`)
-  },
-
-  /**
-   * Send a user message and retrieve AI response with source citations
-   * @param {Object} params
-   * @param {string} params.conversationId
-   * @param {string} params.message
-   * @returns {Promise<{ message: Object, conversation: Object }>}
-   */
-  async sendMessage({ conversationId, message }) {
-    if (USE_MOCK_API) {
-      return mockAssistantApi.sendMessage({ conversationId, message })
-    }
-    return apiClient.post('/assistant/chat', {
-      conversation_id: conversationId,
-      message,
-    })
-  },
-
-  /**
-   * Request regeneration of an assistant response
-   * @param {Object} params
-   * @param {string} params.conversationId
-   * @param {string} params.messageId
-   * @returns {Promise<{ message: Object }>}
-   */
-  async regenerateMessage({ conversationId, messageId }) {
-    if (USE_MOCK_API) {
-      return mockAssistantApi.regenerateMessage({ conversationId, messageId })
-    }
-    return apiClient.post(`/assistant/messages/${messageId}/regenerate`, {
-      conversation_id: conversationId,
-    })
-  },
-
-  /**
-   * Clear all messages in current conversation
-   * @param {string} conversationId
-   * @returns {Promise<{ success: boolean }>}
-   */
-  async clearConversation(conversationId) {
-    if (USE_MOCK_API) {
-      return mockAssistantApi.clearConversation(conversationId)
-    }
-    return apiClient.post(`/assistant/conversations/${conversationId}/clear`)
   },
 }

@@ -8,7 +8,7 @@
  * - Normalized error responses so raw stack traces are not exposed to the UI
  */
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1'
 const DEFAULT_TIMEOUT_MS = 30000
 
 /**
@@ -32,10 +32,17 @@ export class ApiError extends Error {
 async function request(endpoint, options = {}) {
   const url = `${BASE_URL.replace(/\/$/, '')}/${endpoint.replace(/^\//, '')}`
   
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData
+
   const headers = {
-    'Content-Type': 'application/json',
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     Accept: 'application/json',
     ...(options.headers || {}),
+  }
+
+  // If body is FormData, ensure Content-Type is not set manually so browser computes boundary
+  if (isFormData && headers['Content-Type']) {
+    delete headers['Content-Type']
   }
 
   const controller = new AbortController()
@@ -87,10 +94,22 @@ async function request(endpoint, options = {}) {
 
 export const apiClient = {
   get: (endpoint, options) => request(endpoint, { method: 'GET', ...options }),
-  post: (endpoint, body, options) =>
-    request(endpoint, { method: 'POST', body: JSON.stringify(body), ...options }),
-  put: (endpoint, body, options) =>
-    request(endpoint, { method: 'PUT', body: JSON.stringify(body), ...options }),
+  post: (endpoint, body, options = {}) => {
+    const isFormData = typeof FormData !== 'undefined' && body instanceof FormData
+    return request(endpoint, {
+      method: 'POST',
+      body: isFormData ? body : JSON.stringify(body),
+      ...options,
+    })
+  },
+  put: (endpoint, body, options = {}) => {
+    const isFormData = typeof FormData !== 'undefined' && body instanceof FormData
+    return request(endpoint, {
+      method: 'PUT',
+      body: isFormData ? body : JSON.stringify(body),
+      ...options,
+    })
+  },
   delete: (endpoint, options) => request(endpoint, { method: 'DELETE', ...options }),
   getBaseUrl: () => BASE_URL,
 }

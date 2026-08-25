@@ -49,15 +49,31 @@ export default function IndustryAssistant() {
     dismissError,
   } = useAssistant()
 
-  // Handle incoming 'Ask AI' navigation prompt from Standards search
+  // Handle incoming 'Ask AI' navigation prompt from Dashboard, Standards, Compliance, or Documents
   useEffect(() => {
-    if (location.state?.prompt && !handledPromptRef.current && !isLoading) {
+    const rawState = location.state
+    if (!rawState || handledPromptRef.current || isLoading) return
+
+    const incomingPrompt =
+      rawState.prompt ||
+      rawState.initialQuery ||
+      (rawState.requirementContext
+        ? `Can you explain the technical compliance and testing requirements for "${rawState.requirementContext}" and how to verify it under BIS guidelines?`
+        : null)
+
+    if (incomingPrompt) {
       handledPromptRef.current = true
-      const incomingPrompt = location.state.prompt
-      // Start a fresh conversation with document or standard title if provided
-      const title = location.state.documentName || location.state.standardNumber || 'AI Assistant Query'
-      createNewConversation(title).then(() => {
-        sendMessage(incomingPrompt)
+      const title =
+        rawState.documentName ||
+        rawState.standardNumber ||
+        rawState.requirementContext ||
+        (rawState.initialQuery && rawState.initialQuery.length > 25
+          ? `${rawState.initialQuery.substring(0, 25)}...`
+          : rawState.initialQuery) ||
+        'AI Assistant Query'
+
+      createNewConversation(title).then((newConv) => {
+        sendMessage(incomingPrompt, newConv?.id)
       })
     }
   }, [location.state, isLoading, createNewConversation, sendMessage])

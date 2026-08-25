@@ -1,11 +1,12 @@
 import { BotMessageSquare, Send, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import ConsumerLayout from '../../layouts/ConsumerLayout'
 import { ConsumerSourceCard, ConsumerChatMessage } from '../../components/consumer/ConsumerUI'
 import {
   consumerAISuggestions,
-  consumerSources,
 } from '../../data/consumerMockData'
+import { assistantApi } from '../../services/api/assistantApi'
 
 const initialMessages = [
   {
@@ -15,21 +16,51 @@ const initialMessages = [
 ]
 
 export default function ConsumerAIAssistant() {
+  const location = useLocation()
   const [messages, setMessages] = useState(initialMessages)
   const [input, setInput] = useState('')
+  const [sessionId, setSessionId] = useState(null)
+  const [sources, setSources] = useState([])
+  const [isSending, setIsSending] = useState(false)
+  const handledInitialQueryRef = useRef(false)
 
-  const send = () => {
-    if (!input.trim()) return
-    setMessages([
-      ...messages,
-      { role: 'user', text: input },
-      {
-        role: 'ai',
-        text: 'This is a demo response. In the next phase, this will provide source-aware guidance based on BIS information and consumer needs.',
-      },
-    ])
+  const sendQuery = async (queryText) => {
+    const textToSend = (queryText || input).trim()
+    if (!textToSend || isSending) return
+    setMessages((prev) => [...prev, { role: 'user', text: textToSend }])
     setInput('')
+    setIsSending(true)
+    try {
+      let activeSessionId = sessionId
+      if (!activeSessionId) {
+        const created = await assistantApi.createConversation('New Conversation', 'consumer')
+        activeSessionId = created.conversation.id
+        setSessionId(activeSessionId)
+      }
+      const response = await assistantApi.sendMessage({
+        conversationId: activeSessionId,
+        message: textToSend,
+        mode: 'consumer',
+      })
+      setMessages((prev) => [...prev, { role: 'ai', text: response.message.content }])
+      setSources(response.message.sources || [])
+    } catch {
+      setMessages((prev) => [...prev, { role: 'ai', text: 'Unable to process this request. Please try again.' }])
+    } finally {
+      setIsSending(false)
+    }
   }
+
+  const send = () => sendQuery(input)
+
+  // Handle incoming query from consumer search or links
+  useEffect(() => {
+    const initialQuery = location.state?.initialQuery || location.state?.prompt
+    if (initialQuery && !handledInitialQueryRef.current) {
+      handledInitialQueryRef.current = true
+      sendQuery(initialQuery)
+    }
+  }, [location.state])
 
   return (
     <ConsumerLayout title="Ask BIS AI">
@@ -47,7 +78,7 @@ export default function ConsumerAIAssistant() {
             </div>
             <button
               type="button"
-              onClick={() => setMessages([])}
+              onClick={() => { setMessages([]); setSources([]); setSessionId(null) }}
               className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 hover:text-navy"
             >
               <Trash2 size={14} />
@@ -89,7 +120,7 @@ export default function ConsumerAIAssistant() {
               <button
                 onClick={send}
                 type="button"
-                disabled={!input.trim()}
+                disabled={!input.trim() || isSending}
                 className="rounded-lg bg-orange-600 p-2.5 text-white transition hover:bg-orange-700 disabled:opacity-50"
                 aria-label="Send message"
               >
@@ -104,8 +135,14 @@ export default function ConsumerAIAssistant() {
             <h3 className="font-bold text-ink">Sources</h3>
             <p className="mt-1 text-xs text-slate-500">Information used for this conversation</p>
             <div className="mt-4 space-y-3">
-              {consumerSources.map((source) => (
-                <ConsumerSourceCard key={source.title} {...source} />
+              {sources.length === 0 ? (
+                <p className="text-xs text-slate-400">Sources will appear with a grounded answer.</p>
+              ) : sources.map((source) => (
+                <ConsumerSourceCard
+                  key={source.chunkId || source.id}
+                  title={`${source.standardNumber} — ${source.title}`}
+                  description={`${source.section || 'Source'} · Page ${source.page}`}
+                />
               ))}
             </div>
           </div>

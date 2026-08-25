@@ -6,19 +6,22 @@
 
 import { Router } from 'express';
 import healthRoutes from './healthRoutes.js';
+import knowledgeRoutes from './knowledgeRoutes.js';
+import assistantRoutes from './assistantRoutes.js';
 
 const router = Router();
 
 /**
- * Phase 0 — Core Foundation Routes
+ * Phase 0, Phase 2 & Phase 3 Core Routes
  */
 router.use('/health', healthRoutes);
+router.use('/knowledge', knowledgeRoutes);
+router.use('/assistant', assistantRoutes);
 
 /**
  * Future API Module Placeholders (to be implemented in subsequent phases):
  * 
  * router.use('/standards', standardsRoutes);
- * router.use('/assistant', assistantRoutes);
  * router.use('/certification', certificationRoutes);
  * router.use('/compliance', complianceRoutes);
  * router.use('/testing', testingRoutes);
