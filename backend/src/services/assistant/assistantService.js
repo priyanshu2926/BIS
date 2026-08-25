@@ -254,9 +254,144 @@ export const listSessions = async (mode) => {
   return results.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 };
 
+/** Delete a conversation session and its messages. */
+export const deleteSession = async (sessionId) => {
+  if (await isDatabaseAvailable()) {
+    try {
+      await prisma.assistantSession.delete({ where: { id: sessionId } });
+      return { success: true, id: sessionId };
+    } catch {
+      // Fallback to in-memory store
+    }
+  }
+
+  if (!inMemorySessions.has(sessionId)) {
+    const error = new Error('Conversation session not found.');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  inMemorySessions.delete(sessionId);
+  inMemoryMessages.delete(sessionId);
+  return { success: true, id: sessionId };
+};
+
+/** Clear all messages in a session without deleting the session itself. */
+export const clearSession = async (sessionId) => {
+  if (await isDatabaseAvailable()) {
+    try {
+      const session = await prisma.assistantSession.findUnique({ where: { id: sessionId } });
+      if (!session) {
+        const error = new Error('Conversation session not found.');
+        error.statusCode = 404;
+        throw error;
+      }
+      await prisma.assistantMessage.deleteMany({ where: { sessionId } });
+      await prisma.assistantSession.update({
+        where: { id: sessionId },
+        data: { title: 'New Conversation', updatedAt: new Date() },
+      });
+      return { success: true };
+    } catch (err) {
+      if (err.statusCode === 404) throw err;
+      // Fallback to in-memory store
+    }
+  }
+
+  if (!inMemorySessions.has(sessionId)) {
+    const error = new Error('Conversation session not found.');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  inMemoryMessages.set(sessionId, []);
+  const session = inMemorySessions.get(sessionId);
+  if (session) {
+    session.title = 'New Conversation';
+    session.updatedAt = new Date().toISOString();
+  }
+  return { success: true };
+};
+
+/** Regenerate an assistant message by re-running the RAG pipeline on the prior user prompt. */
+export const regenerateMessage = async ({ sessionId, messageId }) => {
+  const session = await getSessionById(sessionId);
+  if (!session) {
+    const error = new Error('Conversation session not found.');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const messages = session.messages || [];
+  const targetIndex = messages.findIndex((m) => m.id === messageId);
+  if (targetIndex === -1) {
+    const error = new Error('Message not found for regeneration.');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  let previousUserPrompt = '';
+  for (let i = targetIndex - 1; i >= 0; i -= 1) {
+    if (messages[i].role === 'USER') {
+      previousUserPrompt = messages[i].content;
+      break;
+    }
+  }
+
+  if (!previousUserPrompt) {
+    const error = new Error('No preceding user message found for regeneration.');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const historyBefore = messages.slice(0, targetIndex - 1);
+  const contextQuery = historyBefore.slice(-4).map((m) => m.content).join(' ');
+  const retrievedChunks = await retrievalService.retrieveRelevantChunks(previousUserPrompt, { contextQuery });
+  const promptData = promptService.constructPrompt({
+    message: previousUserPrompt,
+    mode: session.mode || 'industry',
+    retrievedChunks,
+    history: historyBefore,
+  });
+  const answer = await llmService.generateAnswer(
+    { message: previousUserPrompt, mode: session.mode || 'industry', retrievedChunks },
+    promptData
+  );
+  const sources = citationService.buildCitations(retrievedChunks);
+
+  if (await isDatabaseAvailable()) {
+    try {
+      const updated = await prisma.assistantMessage.update({
+        where: { id: messageId },
+        data: {
+          content: answer,
+          metadata: { sources },
+        },
+      });
+      return { message: updated };
+    } catch {
+      // Fallback to in-memory store
+    }
+  }
+
+  const list = inMemoryMessages.get(sessionId) || messages;
+  const updatedMessage = {
+    ...list[targetIndex],
+    content: answer,
+    metadata: { sources },
+    createdAt: new Date().toISOString(),
+  };
+  list[targetIndex] = updatedMessage;
+  inMemoryMessages.set(sessionId, list);
+  return { message: updatedMessage };
+};
+
 export default {
   processChat,
   createSession,
   getSessionById,
   listSessions,
+  deleteSession,
+  clearSession,
+  regenerateMessage,
 };

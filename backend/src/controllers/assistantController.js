@@ -100,9 +100,58 @@ export const listSessions = async (req, res, next) => {
   }
 };
 
+/** Delete a conversation session. */
+export const deleteSession = async (req, res, next) => {
+  try {
+    const result = await assistantService.deleteSession(req.params.id);
+    return res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    if (error.statusCode === 404) {
+      return res.status(404).json({ success: false, message: error.message });
+    }
+    return next(error);
+  }
+};
+
+/** Clear all messages in a conversation session. */
+export const clearSession = async (req, res, next) => {
+  try {
+    const result = await assistantService.clearSession(req.params.id);
+    return res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    if (error.statusCode === 404) {
+      return res.status(404).json({ success: false, message: error.message });
+    }
+    return next(error);
+  }
+};
+
+/** Regenerate a specific assistant message. */
+export const regenerateMessage = async (req, res, next) => {
+  try {
+    const { messageId } = req.body || {};
+    if (!messageId) {
+      return res.status(400).json({ success: false, message: 'Field "messageId" is required.' });
+    }
+    const result = await assistantService.regenerateMessage({
+      sessionId: req.params.id,
+      messageId,
+    });
+    return res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    if (error.statusCode === 404 || error.statusCode === 400) {
+      return res.status(error.statusCode).json({ success: false, message: error.message });
+    }
+    return next(error);
+  }
+};
+
 export default {
   chat,
   createSession,
   getSession,
   listSessions,
+  deleteSession,
+  clearSession,
+  regenerateMessage,
 };

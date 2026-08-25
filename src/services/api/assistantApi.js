@@ -57,4 +57,23 @@ export const assistantApi = {
       },
     }
   },
+
+  async deleteConversation(conversationId) {
+    if (USE_MOCK_API) return mockAssistantApi.deleteConversation(conversationId)
+    const response = await apiClient.delete(`/assistant/sessions/${conversationId}`)
+    return response.data
+  },
+
+  async regenerateMessage({ conversationId, messageId }) {
+    if (USE_MOCK_API) return mockAssistantApi.regenerateMessage({ conversationId, messageId })
+    const response = await apiClient.post(`/assistant/sessions/${conversationId}/regenerate`, { messageId })
+    const data = response.data
+    return { message: toMessage(data.message) }
+  },
+
+  async clearConversation(conversationId) {
+    if (USE_MOCK_API) return mockAssistantApi.clearConversation(conversationId)
+    const response = await apiClient.delete(`/assistant/sessions/${conversationId}/messages`)
+    return response.data
+  },
 }

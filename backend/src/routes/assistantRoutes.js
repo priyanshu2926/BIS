@@ -4,7 +4,15 @@
  */
 
 import { Router } from 'express';
-import { chat, createSession, getSession, listSessions } from '../controllers/assistantController.js';
+import {
+  chat,
+  clearSession,
+  createSession,
+  deleteSession,
+  getSession,
+  listSessions,
+  regenerateMessage,
+} from '../controllers/assistantController.js';
 import { assistantRateLimiter } from '../middleware/rateLimitMiddleware.js';
 
 const router = Router();
@@ -18,5 +26,9 @@ router.get('/sessions/:id', getSession);
 
 // GET /api/v1/assistant/sessions
 router.get('/sessions', listSessions);
+
+router.delete('/sessions/:id', deleteSession);
+router.delete('/sessions/:id/messages', clearSession);
+router.post('/sessions/:id/regenerate', regenerateMessage);
 
 export default router;

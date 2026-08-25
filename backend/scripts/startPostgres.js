@@ -1,5 +1,6 @@
 import { PGlite } from '@electric-sql/pglite';
 import { PGLiteSocketServer } from '@electric-sql/pglite-socket';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import net from 'net';
@@ -11,13 +12,35 @@ const __dirname = path.dirname(__filename);
 // prevent the bundled development database from starting.
 const dbPath = path.resolve(__dirname, '../prisma/pglite-data');
 
-process.on('uncaughtException', (err) => {
-  console.error('[Database Server uncaughtException]:', err.message);
-});
+/**
+ * Detect a native PostgreSQL data directory copied into the PGlite path.
+ * PGlite also creates postgresql.conf, so we only flag dirs that have a
+ * postmaster.pid left over from a real PostgreSQL server (not PGlite).
+ */
+function isLegacyPostgresDataDir(dirPath) {
+  if (!fs.existsSync(dirPath)) return false;
+  const pidFile = path.join(dirPath, 'postmaster.pid');
+  if (!fs.existsSync(pidFile)) return false;
+  try {
+    const firstLine = fs.readFileSync(pidFile, 'utf8').split('\n')[0].trim();
+    // Real PostgreSQL postmaster.pid starts with a numeric PID; PGlite does not use this format.
+    return /^\d+$/.test(firstLine);
+  } catch {
+    return false;
+  }
+}
 
-process.on('unhandledRejection', (err) => {
-  console.error('[Database Server unhandledRejection]:', err);
-});
+function resetDataDir(dirPath) {
+  if (fs.existsSync(dirPath)) {
+    fs.rmSync(dirPath, { recursive: true, force: true });
+  }
+}
+
+async function createPgliteInstance(dirPath) {
+  const db = new PGlite(dirPath);
+  await db.query('SELECT 1');
+  return db;
+}
 
 export async function isPortInUse(port = 5432) {
   return new Promise((resolve) => {
@@ -45,10 +68,35 @@ export async function startPostgresServer(port = 5432) {
     return null;
   }
 
-  const db = new PGlite(dbPath);
+  let schemaNeedsSync = !fs.existsSync(dbPath);
+
+  if (isLegacyPostgresDataDir(dbPath)) {
+    console.warn(`[Database] Removing incompatible PostgreSQL data at ${dbPath}. PGlite requires its own format.`);
+    resetDataDir(dbPath);
+    schemaNeedsSync = true;
+  }
+  let db;
+  try {
+    db = await createPgliteInstance(dbPath);
+  } catch (err) {
+    if (String(err?.message || err).includes('failed to initialize')) {
+      console.warn(`[Database] PGlite data at ${dbPath} is corrupt or incompatible. Recreating...`);
+      resetDataDir(dbPath);
+      schemaNeedsSync = true;
+      db = await createPgliteInstance(dbPath);
+    } else {
+      throw err;
+    }
+  }
+
   const server = new PGLiteSocketServer({ db, port, host: '127.0.0.1', maxConnections: 100 });
   await server.start();
   console.log(`[Database] Local PostgreSQL wire-protocol server listening on 127.0.0.1:${port} (maxConnections: 100, data: ${dbPath})`);
+
+  if (schemaNeedsSync) {
+    console.warn('[Database] Fresh PGlite database created. Run "npm run db:push" once to apply the schema.');
+  }
+
   return server;
 }
 
