@@ -1,8 +1,8 @@
-# BIS AI Assistant — Backend API (Phase 0 Foundation)
+# BIS AI Assistant — Backend API (Phase 1)
 
 Backend service for the **SIH Project: AI-powered Intelligent Assistant for Indian Standards and BIS Services for Industries and Consumers**.
 
-> **Note on Phase 0**: This is strictly the **Backend Foundation** phase. It establishes a clean REST API architecture, Express configuration, environment management, CORS, security middleware, and centralized error handling. AI/RAG models, vector databases, web scrapers, and database schemas will be integrated in subsequent phases.
+Phase 1 adds a PostgreSQL-backed Prisma data layer, demo seed data, pagination, search, and read APIs for the existing Industry and Consumer frontends. AI/RAG, authentication, uploads, OCR, and recommendation logic are intentionally excluded.
 
 ---
 
@@ -18,6 +18,7 @@ Backend service for the **SIH Project: AI-powered Intelligent Assistant for Indi
   * `dotenv` — Environment variable management
 * **Development**:
   * `nodemon` — Automatic server reloading
+* **Database**: PostgreSQL through Prisma ORM
 
 ---
 
@@ -64,6 +65,15 @@ cd backend
 ```bash
 npm install
 ```
+
+Initialize and seed the database:
+```bash
+npm run db:generate
+npm run db:migrate
+npm run db:seed
+```
+
+For the bundled local PGlite PostgreSQL-compatible server, use `npm run db:push`; Prisma `migrate dev` requires a standard PostgreSQL server connection workflow.
 
 ### Step 3: Configure Environment Variables
 Copy `.env.example` to `.env`:
@@ -112,6 +122,24 @@ All API endpoints are versioned under `/api/v1/`.
 }
 ```
 
+### Phase 1 resources
+
+All list endpoints accept `page` and `limit` (default `1` and `20`, maximum `100`). Standards and products also provide `/search?q=` endpoints.
+
+| Resource | Endpoints |
+| --- | --- |
+| Users | `GET /api/v1/users`, `GET /api/v1/users/:id` |
+| Standards | `GET /api/v1/standards`, `/standards/:id`, `/standards/search?q=` |
+| Products | `GET /api/v1/products`, `/products/:id`, `/products/search?q=` |
+| Certification | `GET /api/v1/certification`, `/certification/:id` |
+| Compliance | `GET /api/v1/compliance`, `/compliance/:id` |
+| Testing labs | `GET /api/v1/testing/labs`, `/testing/labs/:id` |
+| Documents | `GET /api/v1/documents`, `/documents/:id` |
+| Complaints | `GET /api/v1/complaints`, `/complaints/:id`, `POST /api/v1/complaints` |
+| Chat sessions | `GET /api/v1/chat`, `/chat/:id` (database foundation only) |
+
+Successful list responses use `{ success, data, pagination }`; individual resources use `{ success, data }`. Complaint creation requires a non-empty `description` and accepts optional valid `userId` and `productId` values.
+
 ### 404 Handling (Unknown Route)
 * **Route**: `GET /api/v1/test` (or any unregistered route)
 * **Response (404 Not Found)**:
@@ -128,7 +156,7 @@ All API endpoints are versioned under `/api/v1/`.
 
 The frontend communicates with this backend via its modular service layer (`src/services/api/`).
 
-When future phases are implemented, API endpoints will be registered under the central router `src/routes/index.js`:
+The route-to-database flow is `Route -> Controller -> Service -> Prisma -> PostgreSQL`.
 
 | Module | Route Prefix | Description |
 | :--- | :--- | :--- |
@@ -144,10 +172,6 @@ When future phases are implemented, API endpoints will be registered under the c
 
 ---
 
-## 7. Upcoming Backend Phases
+## 7. Deliberately deferred
 
-1. **Phase 1 — Database & Standards Indexing**: MongoDB / PostgreSQL schema setup and official BIS standards ingestion.
-2. **Phase 2 — Vector Search & RAG Foundation**: Embedding generation and vector database indexing for BIS gazette clauses.
-3. **Phase 3 — AI Assistant & Citation Engine**: Integration of LLM reasoning pipeline with source-backed citations.
-4. **Phase 4 — Certification, Compliance & Lab Testing APIs**: Business logic services for manufacturer guidance.
-5. **Phase 5 — Document Intelligence**: OCR parsing, PDF text extraction, and automated clause matching.
+Future phases may add official BIS ingestion, vector search, AI chat, authentication, uploads, OCR, and advanced certification/compliance logic. They are outside Phase 1.
